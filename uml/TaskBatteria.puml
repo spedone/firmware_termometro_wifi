@@ -1,0 +1,16 @@
+@startuml TaskBatteria_State
+[*] --> Setup
+
+state Setup {
+  Setup : pinMode(A7, INPUT)
+}
+
+state Campionamento {
+  Campionamento : analogRead(A7)
+  Campionamento : Calcolo Tensione (V * 2.13)
+  Campionamento : setTensioneBatteria()
+}
+
+Setup --> Campionamento
+Campionamento --> Campionamento : Attesa 500ms
+@enduml

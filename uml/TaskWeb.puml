@@ -1,0 +1,17 @@
+@startuml TaskWeb_State_Machine
+[*] --> start_server
+
+state start_server {
+  start_server : Configura Routes (/ , /config)
+  start_server : Avvia WebServer e WS
+}
+
+state websocket_idle {
+  websocket_idle : Invia letture sensori via WS
+}
+
+start_server --> websocket_idle
+
+websocket_idle --> start_server : Segnale resetWeb
+websocket_idle --> websocket_idle : Loop invio (500ms)
+@enduml

@@ -1,0 +1,26 @@
+@startuml
+title Diagramma di Stato - Task MQTT
+
+[*] --> mqtt_start : Avvio Task
+
+state mqtt_start {
+  mqtt_start : Configurazione server e credenziali
+}
+
+mqtt_start --> mqtt_wait : client.connect()
+
+state mqtt_wait {
+  mqtt_wait : Attesa ack dal broker
+}
+
+mqtt_wait --> mqtt_client_mode : Connesso
+mqtt_wait --> mqtt_start : Timeout > 5 secondi
+
+state mqtt_client_mode {
+  mqtt_client_mode : Invio JSON dati sensori (ogni 5s)
+}
+
+mqtt_client_mode --> mqtt_start : Connessione persa
+mqtt_client_mode --> mqtt_client_mode : Loop di pubblicazione
+
+@enduml
