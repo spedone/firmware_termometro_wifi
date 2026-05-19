@@ -1,22 +1,9 @@
 @startuml TaskTemperatura_State
-[*] --> Inizializzazione
 
-state Inizializzazione {
-  Inizializzazione : thermo.begin()
-  Inizializzazione : 50Hz Filter ON
+title Diagramma di stato - Task Temperatura
+
+[*] --> loop_lettura
+
+state loop_lettura{
+  loop_lettura --> loop_lettura
 }
-
-state Lettura {
-  Lettura : Leggi temperatura PT100
-  Lettura : setTemperatura()
-}
-
-state GestioneErrore {
-  GestioneErrore : setErroreTemperatura(true)
-}
-
-Inizializzazione --> Lettura
-Lettura --> GestioneErrore : thermo.readFault() == true
-GestioneErrore --> Lettura : Fault risolto
-Lettura --> Lettura : Attesa 300ms
-@enduml

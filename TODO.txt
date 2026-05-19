@@ -1,0 +1,9 @@
+1. Inserire costante partitore tra i parametri configurabili da webserver
+2. Aggiornare formula batteria range 3.38 - 4.18 V
+3. Correggere soglia minima deep sleep 3.36 V
+4. Correggere reset icona batteria dopo ingresso in deep sleep
+5. Inserire in una costante nome e sn dispositivo per rete Access point (TWIFI-26001)
+6. Correggere logica gestione errore modulo RTD lasciando fisso ERR su display
+7. Calibrare i tempi di attesa task per ridurre consumi
+8. Testare durata carica batteria per tutti i dispositivi
+9. Tarare la costante del partitore considerando valori min e max batteria (tutti i dispositivi)

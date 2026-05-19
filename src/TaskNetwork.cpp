@@ -36,15 +36,14 @@ static status wifi_start(status s) {
   WiFi.begin(p.wifi_ssid.c_str(), p.wifi_password.c_str());
   
   timeout_wifi = millis();
-  setStatoWifi(WiFi.macAddress(), true, WiFi.localIP().toString(), false);
+  setStatoWifi(WiFi.macAddress(), false, WiFi.localIP().toString(), false);
   return (status){.run = wifi_wait};
 }
 
 static status wifi_wait(status s) {
 
   if(WiFi.status() == WL_CONNECTED) {
-    setStatoWifi(WiFi.macAddress(), true, WiFi.localIP().toString(), true);
-    resetWeb(true);
+    sendResetWeb();
     return (status){.run = wifi_idle};
   }
 
@@ -57,28 +56,23 @@ static status wifi_wait(status s) {
 
 static status wifi_idle(status s) {
 
-  if(WiFi.status() != WL_CONNECTED || getSegnali().resetNetwork) {
-    resetNetwork(false);
-    resetWeb(true);
+  setStatoWifi(WiFi.macAddress(), false, WiFi.localIP().toString(), true);
+  if(WiFi.status() != WL_CONNECTED || catchResetNetwork()) 
     return (status){.run = wifi_start};
-  }
-
   return s;
 }
 
 static status ap_mode_start(status s) {
   WiFi.mode(WIFI_AP);
-  WiFi.softAP("ESP32_"+WiFi.macAddress(), "12345678");
+  WiFi.softAP(MODEL_NAME "-" SERIAL_NR, "12345678");
   setStatoWifi(WiFi.macAddress(), false, WiFi.softAPIP().toString(), false);
-  resetWeb(true);
+  sendResetWeb();
   return (status){.run = ap_mode_idle};
 }
 
 static status ap_mode_idle(status s){
-  if(getSegnali().resetNetwork){ 
-    resetNetwork(false);
-    return (status){.run = wifi_start};
-  }
+  if(catchResetNetwork()) return (status){.run = wifi_start};
+  setStatoWifi(WiFi.macAddress(), true, WiFi.softAPIP().toString(), false);
   return s;
 }
 

@@ -49,6 +49,7 @@ static const char index_html[] PROGMEM = R"rawliteral(
             MQTT Username: <input type="text" name="mqtt_username" value="%MQTT_USERNAME%"><br><br>
             MQTT Password: <input type="password" name="mqtt_password" value="%MQTT_PASSWORD%"><br><br>
             MQTT Endpoint: <input type="text" name="mqtt_endpoint" value="%MQTT_ENDPOINT%"><br><br>
+            K Divider: <input type="number" step="0.01" name="k_divider" value="%K_DIVIDER%"><br><br>
             <input type="submit" value="Save Configuration">
         </form>
     </div>
@@ -81,6 +82,9 @@ static const char index_html[] PROGMEM = R"rawliteral(
 
 static status start_server(status s){
 
+    StatoRete sr = getStatoRete();
+    if(!sr.isWifiConnected and !sr.isStationMode) return s;
+
     // ROUTE: Serve Main Page with dynamic placeholders
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
         request->send_P(200, "text/html", index_html,
@@ -95,6 +99,7 @@ static status start_server(status s){
                 if(var == "MQTT_USERNAME") return p.mqtt_username;
                 if(var == "MQTT_PASSWORD") return p.mqtt_password;
                 if(var == "MQTT_ENDPOINT") return p.mqtt_endpoint;
+                if(var == "K_DIVIDER") return String(p.k_divider, 2);
                 return String();
             }
         );
@@ -133,10 +138,14 @@ static status start_server(status s){
             p.mqtt_endpoint = request->getParam("mqtt_endpoint", true)->value();
         }
 
+        if (request->hasParam("k_divider", true)) {
+            p.k_divider = request->getParam("k_divider", true)->value().toDouble();
+        }
+
         saveParametriConfigurazione(p);
         loadParametriConfigurazione();
-        resetNetwork(true);
-        request->redirect("/");
+        sendResetNetwork();
+        return request->redirect("/");
     });
 
     // HANDLER: WebSocket
@@ -154,8 +163,7 @@ static status start_server(status s){
 
 static status websocket_idle(status s){
 
-    if(getSegnali().resetWeb){
-        resetWeb(false);
+    if(catchResetWeb()){
         server.end();
         return (status){.run = start_server};
     }

@@ -1,38 +1,29 @@
 @startuml
-title Diagramma di Stato - Task Network
-
-[*] --> wifi_start : Avvio Task
+title Diagramma di stato - Task Network
+[*] --> wifi_start
 
 state wifi_start {
-  wifi_start : Controllo SSID in configurazione
+   wifi_start: avvia connessione
 }
 
-wifi_start --> ap_mode_start : SSID vuoto
-wifi_start --> wifi_wait : SSID presente / WiFi.begin()[cite: 1]
-
-state wifi_wait {
-  wifi_wait : Attesa connessione (max 10s)
-}
-
-wifi_wait --> wifi_idle : Connesso (WL_CONNECTED)[cite: 1]
-wifi_wait --> ap_mode_start : Timeout > 10 secondi[cite: 1]
-
-state wifi_idle {
-  wifi_idle : Sistema operativo in rete
-}
-
-wifi_idle --> wifi_start : Connessione persa o resetNetwork[cite: 1]
+state wifi_wait
+state wifi_idle
 
 state ap_mode_start {
-  ap_mode_start : Configurazione Soft-AP
+   ap_mode_start: avvia access point
 }
 
-ap_mode_start --> ap_mode_idle : AP Attivo[cite: 1]
+state ap_mode_idle
 
-state ap_mode_idle {
-  ap_mode_idle : Attesa segnale di reset
-}
-
-ap_mode_idle --> wifi_start : resetNetwork ricevuto[cite: 1]
+wifi_start --> ap_mode_start : if wifi_ssid = ""
+wifi_start --> wifi_wait : richiesta effettuata
+wifi_wait --> wifi_wait : loop attesa connessione
+wifi_wait --> wifi_idle : wifi connected 
+wifi_wait --> ap_mode_start : if timout > 10 sec
+wifi_idle --> wifi_start : wifi not connected || resetNetwork
+wifi_idle --> wifi_idle : loop monitoraggio connessione
+ap_mode_start --> ap_mode_idle
+ap_mode_idle --> wifi_start : resetNetwork
+ap_mode_idle --> ap_mode_idle : loop attesa resetNetwork 
 
 @enduml

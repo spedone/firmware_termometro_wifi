@@ -78,6 +78,7 @@ ParametriConfigurazione getParametriConfigurazione(){
     p.mqtt_port = parametriConfigurazione.mqtt_port;
     p.mqtt_username = parametriConfigurazione.mqtt_username;
     p.mqtt_password = parametriConfigurazione.mqtt_password;
+    p.k_divider = parametriConfigurazione.k_divider;
     xSemaphoreGive(xMutexParametriConfigurazione);
   }
 
@@ -95,6 +96,7 @@ void loadParametriConfigurazione(){
     parametriConfigurazione.mqtt_port = pref.getInt("mqtt_port", 1884);
     parametriConfigurazione.mqtt_username = pref.getString("mqtt_username", "");
     parametriConfigurazione.mqtt_password = pref.getString("mqtt_password", "");
+    parametriConfigurazione.k_divider = pref.getDouble("k_divider", 2.13);
     pref.end();
     xSemaphoreGive(xMutexParametriConfigurazione);
   }
@@ -111,6 +113,7 @@ void saveParametriConfigurazione(ParametriConfigurazione p){
   pref.putInt("mqtt_port", p.mqtt_port);
   pref.putString("mqtt_username", p.mqtt_username);
   pref.putString("mqtt_password", p.mqtt_password);
+  pref.putDouble("k_divider", p.k_divider);
   pref.end();
 }
 
@@ -125,7 +128,7 @@ void setTemperatura(double t){
 void setTensioneBatteria(double t){
   if (xSemaphoreTake(xMutexLettureSensori, pdMS_TO_TICKS(10)) == pdTRUE) {
     lettureSensori.tensioneBatteria = t;
-    lettureSensori.percentualeBatteria = ceil(constrain((t- 3.5) / (4.2 - 3.5) *100, 0 , 100));;
+    lettureSensori.percentualeBatteria = (t - 3.38) / 0.8 * 100;
     xSemaphoreGive(xMutexLettureSensori);
   }
 }
@@ -155,24 +158,51 @@ void setStatoMqtt(bool isMqttConnected){
   }
 }
 
-void resetNetwork(bool r){
+void sendResetNetwork(){
   if (xSemaphoreTake(xMutexSegnali, pdMS_TO_TICKS(10)) == pdTRUE) {
-    segnali.resetNetwork = r;
+    segnali.resetNetwork = true;
     xSemaphoreGive(xMutexSegnali);
   }
 }
-
-
-void resetWeb(bool r){
+void sendResetWeb(){
   if (xSemaphoreTake(xMutexSegnali, pdMS_TO_TICKS(10)) == pdTRUE) {
-    segnali.resetWeb = r;
+    segnali.resetWeb = true;
     xSemaphoreGive(xMutexSegnali);
   }
 }
-
-void deepSleep(){
+void sendDeepSleep(){
   if (xSemaphoreTake(xMutexSegnali, pdMS_TO_TICKS(10)) == pdTRUE) {
     segnali.deepSleep = true;
     xSemaphoreGive(xMutexSegnali);
   }
+}
+
+bool catchResetNetwork(){
+  bool r = false;
+  if (xSemaphoreTake(xMutexSegnali, pdMS_TO_TICKS(10)) == pdTRUE) {
+    r = segnali.resetNetwork;
+    segnali.resetNetwork = false;
+    xSemaphoreGive(xMutexSegnali);
+  }
+  return r;
+}
+
+bool catchResetWeb(){
+  bool r = false;
+  if (xSemaphoreTake(xMutexSegnali, pdMS_TO_TICKS(10)) == pdTRUE) {
+    r = segnali.resetWeb;
+    segnali.resetWeb = false;
+    xSemaphoreGive(xMutexSegnali);
+  }
+  return r;
+}
+
+bool catchDeepSleep(){
+  bool r = false;
+  if (xSemaphoreTake(xMutexSegnali, pdMS_TO_TICKS(10)) == pdTRUE) {
+    r = segnali.deepSleep;
+    segnali.deepSleep = false;
+    xSemaphoreGive(xMutexSegnali);
+  }
+  return r;
 }

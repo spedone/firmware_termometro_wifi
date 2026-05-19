@@ -1,35 +1,18 @@
 @startuml
-title Diagramma di Flusso Logico - Task Display
+title Diagramma di stato - Task Display
 
-[*] --> ClearBuffer : Inizio ciclo loop
+[*] --> display_idle
 
-state ClearBuffer : u8g2.clearBuffer()
-
-ClearBuffer --> CheckNetwork
-
-state CheckNetwork <<choice>>
-CheckNetwork --> ShowAP : isStationMode = false[cite: 2]
-CheckNetwork --> ShowWiFi : isStationMode = true[cite: 2]
-
-state ShowAP : Mostra IP Access Point[cite: 2]
-state ShowWiFi : Mostra IP Station[cite: 2]
-
-ShowWiFi --> ShowMQTT : isMqttConnected = true[cite: 2]
-ShowWiFi --> RenderSensors : isMqttConnected = false[cite: 2]
-
-state ShowMQTT : Mostra Endpoint Broker[cite: 2]
-
-ShowAP --> RenderSensors
-ShowMQTT --> RenderSensors
-
-state RenderSensors {
-  state "Visualizzazione Batteria" as Batt
-  state "Controllo Errore Temperatura" as TempCheck <<choice>>
-  state "Mostra Temperatura" as TempOk
-  state "Mostra ERR" as TempErr
+state display_idle {
+   display_idle: leggi var globali
+   display_idle: aggiorna display
+   display_idle: ripeti dopo 200 ms
 }
 
-RenderSensors --> SendBuffer : u8g2.sendBuffer()[cite: 2]
-SendBuffer --> [*] : Attesa prossimo refresh
+state display_deep_sleep {
+   display_deep_sleep: lampeggia 3 volte 
+}
 
+display_idle --> display_idle : deepSleep == false
+display_idle --> display_deep_sleep : deepSleep == true
 @enduml

@@ -1,16 +1,21 @@
 @startuml TaskBatteria_State
-[*] --> Setup
+title Diagramma di stato - Task Batteria
 
-state Setup {
-  Setup : pinMode(A7, INPUT)
+[*] --> battery_idle
+
+state battery_idle{
+  battery_idle: lettura tensione
+  battery_idle: calcolo percentuale
+  battery_idle: aggiorna variab.condivisa
+}
+state deep_sleep_mode{
+  deep_sleep_mode: segnale deepSleep = true 
+  deep_sleep_mode: attesa 5 secondi
+  deep_sleep_mode: avvia deep sleep mode
+
 }
 
-state Campionamento {
-  Campionamento : analogRead(A7)
-  Campionamento : Calcolo Tensione (V * 2.13)
-  Campionamento : setTensioneBatteria()
-}
 
-Setup --> Campionamento
-Campionamento --> Campionamento : Attesa 500ms
+battery_idle --> battery_idle : tensione >= 3.4 V
+battery_idle --> deep_sleep_mode : tensione < 3.4 V
 @enduml
