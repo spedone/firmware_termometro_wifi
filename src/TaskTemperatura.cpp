@@ -7,7 +7,6 @@
 #define MAX_SDI 9
 #define MAX_SDO 10
 #define MAX_CLK 11
-#define RREF      430.0  // resistenza ref MAX 31865
 #define RNOMINAL  100.0 // sonda pt-100 100 Ohm a 0 °C
 
 static Adafruit_MAX31865 thermo = Adafruit_MAX31865(MAX_CS, MAX_SDI, MAX_SDO, MAX_CLK);
@@ -24,8 +23,9 @@ void startTaskTemperatura(){
 void taskTemperaturaLoop(void * pvParameters){
 
   for(;;) {
-
-    double tempC = thermo.temperature(RNOMINAL, RREF);
+    // prendi R_ref dai parametri di configurazione
+    ParametriConfigurazione p = getParametriConfigurazione();
+    double tempC = thermo.temperature(RNOMINAL, p.r_ref);
     setTemperatura(tempC);
     if(thermo.readFault() == 0){
       setErroreTemperatura(false);

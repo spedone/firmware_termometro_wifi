@@ -79,6 +79,7 @@ ParametriConfigurazione getParametriConfigurazione(){
     p.mqtt_username = parametriConfigurazione.mqtt_username;
     p.mqtt_password = parametriConfigurazione.mqtt_password;
     p.k_divider = parametriConfigurazione.k_divider;
+    p.r_ref = parametriConfigurazione.r_ref;
     xSemaphoreGive(xMutexParametriConfigurazione);
   }
 
@@ -97,6 +98,7 @@ void loadParametriConfigurazione(){
     parametriConfigurazione.mqtt_username = pref.getString("mqtt_username", "");
     parametriConfigurazione.mqtt_password = pref.getString("mqtt_password", "");
     parametriConfigurazione.k_divider = pref.getDouble("k_divider", 2.13);
+    parametriConfigurazione.r_ref = pref.getInt("r_ref", 430);
     pref.end();
     xSemaphoreGive(xMutexParametriConfigurazione);
   }
@@ -114,6 +116,7 @@ void saveParametriConfigurazione(ParametriConfigurazione p){
   pref.putString("mqtt_username", p.mqtt_username);
   pref.putString("mqtt_password", p.mqtt_password);
   pref.putDouble("k_divider", p.k_divider);
+  pref.putInt("r_ref", p.r_ref);
   pref.end();
 }
 

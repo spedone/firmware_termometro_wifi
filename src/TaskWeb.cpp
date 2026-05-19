@@ -50,6 +50,7 @@ static const char index_html[] PROGMEM = R"rawliteral(
             MQTT Password: <input type="password" name="mqtt_password" value="%MQTT_PASSWORD%"><br><br>
             MQTT Endpoint: <input type="text" name="mqtt_endpoint" value="%MQTT_ENDPOINT%"><br><br>
             K Divider: <input type="number" step="0.01" name="k_divider" value="%K_DIVIDER%"><br><br>
+            R Ref: <input type="number" step="1" name="r_ref" value="%R_REF%"><br><br>
             <input type="submit" value="Save Configuration">
         </form>
     </div>
@@ -100,6 +101,8 @@ static status start_server(status s){
                 if(var == "MQTT_PASSWORD") return p.mqtt_password;
                 if(var == "MQTT_ENDPOINT") return p.mqtt_endpoint;
                 if(var == "K_DIVIDER") return String(p.k_divider, 2);
+                if(var == "R_REF") return String(p.r_ref);
+            
                 return String();
             }
         );
@@ -140,6 +143,10 @@ static status start_server(status s){
 
         if (request->hasParam("k_divider", true)) {
             p.k_divider = request->getParam("k_divider", true)->value().toDouble();
+        }
+
+        if (request->hasParam("r_ref", true)) {
+            p.r_ref = request->getParam("r_ref", true)->value().toInt();
         }
 
         saveParametriConfigurazione(p);

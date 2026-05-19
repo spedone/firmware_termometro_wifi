@@ -1,6 +1,7 @@
 #ifndef GLOBALDATA_H
 #define GLOBALDATA_H
 
+
 #ifndef MODEL_NAME
     #define MODEL_NAME "TWIFI-ARDESP32" 
 #endif
@@ -8,8 +9,6 @@
 #ifndef SERIAL_NR
     #define SERIAL_NR "26000" 
 #endif
-
-
 
 #include <Arduino.h>
 
@@ -44,6 +43,7 @@ typedef struct s_parametri_configurazione {
     String mqtt_username;
     String mqtt_password;
     double k_divider;
+    int r_ref;
 } ParametriConfigurazione;
 
 LettureSensori getLettureSensori();
@@ -67,8 +67,6 @@ void sendDeepSleep();
 bool catchResetNetwork();
 bool catchResetWeb();
 bool catchDeepSleep();
-
-
 
 
 #endif

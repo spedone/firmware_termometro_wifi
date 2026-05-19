@@ -66,7 +66,6 @@ static status display_idle(status s){
     u8g2.drawStr(100, 8, str_batteria);
 
     if(l.erroreTemperatura){
-        setErroreTemperatura(false);
         u8g2.setFont(u8g2_font_helvR24_tr);
         u8g2.drawStr(20, 46, "ERR");
     }else {
