@@ -2,14 +2,19 @@
 #include "Tasks.h"
 
 static status current_status;
-static status battery_trigger(status s);
+static status battery_idle(status s);
 static status battery_read(status s);
 static status deep_sleep_mode(status s);
+static double tensione;
+static int timeout_reading;
+static int read_counter;
 
 void startTaskBatteria(){
   pinMode(A6, OUTPUT);
   pinMode(A7, INPUT);
-  current_status = (status){.run = battery_trigger};
+  timeout_reading = millis();
+  read_counter = 1;
+  current_status = (status){.run = battery_idle};
   xTaskCreatePinnedToCore(taskBatteriaLoop, "Batteria", 8192, NULL, 3, NULL, 1);
 }
 
@@ -19,33 +24,47 @@ void taskBatteriaLoop(void * pvParameters) {
 
   for(;;) {
     current_status = current_status.run(current_status);
+    vTaskDelay(pdMS_TO_TICKS(300));
   }
 }
 
-static status battery_trigger(status s){
-  digitalWrite(A6, HIGH); // Chiude il partitore
-  vTaskDelay(pdMS_TO_TICKS(1000)); // ttende 1 sec
-  return (status){.run = battery_read};
+static status battery_idle(status s){
+  
+  if(millis() - timeout_reading > 15000 || read_counter > 0){
+    read_counter = 0;
+    tensione = 0;
+    digitalWrite(A6, HIGH); // Chiude il partitore
+    s = (status){.run = battery_read};
+  } 
+  return s;
 }
 
 static status battery_read(status s){
-  ParametriConfigurazione p = getParametriConfigurazione();
-
-  int rawValue = analogRead(A7);
-  double tensione = (rawValue * 3.3 * p.k_divider) / 4095;
-  setTensioneBatteria(tensione);
-  vTaskDelay(pdMS_TO_TICKS(300));
-  digitalWrite(A6, LOW); //Apre il partitore
-
-  if(tensione <= 3.38) return (status){.run = deep_sleep_mode};
-  vTaskDelay(pdMS_TO_TICKS(1700)); // Attende 2 secondi prima del prossimo trigger 
-  return (status){.run = battery_trigger};
+  
+  if(read_counter < 7){
+    tensione += (double) analogRead(A7) / 4095.0;
+    read_counter++;
+    return s;
+  }else {
+    ParametriConfigurazione p = getParametriConfigurazione();
+    tensione = (tensione * 3.3 * p.k_divider) / 7;
+    setTensioneBatteria(tensione);
+    digitalWrite(A6, LOW); //Apre il partitore
+    timeout_reading = millis();
+    read_counter = 0;
+    if(tensione <= 3.39)
+      s = (status){.run = deep_sleep_mode};
+    else
+      s = (status){.run = battery_idle};
+  }
+  
+  return s;
 } 
 
 static status deep_sleep_mode(status s){
 
   sendDeepSleep();
-  vTaskDelay(pdMS_TO_TICKS(3000));
+  vTaskDelay(pdMS_TO_TICKS(3000)); 
   esp_deep_sleep_start();
   return s;
 } 
