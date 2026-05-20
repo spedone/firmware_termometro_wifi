@@ -37,7 +37,7 @@ static status battery_read(status s){
   vTaskDelay(pdMS_TO_TICKS(300));
   digitalWrite(A6, LOW); //Apre il partitore
 
-  if(tensione <= 3.36) return (status){.run = deep_sleep_mode};
+  if(tensione <= 3.38) return (status){.run = deep_sleep_mode};
   vTaskDelay(pdMS_TO_TICKS(1700)); // Attende 2 secondi prima del prossimo trigger 
   return (status){.run = battery_trigger};
 } 

@@ -131,7 +131,7 @@ void setTemperatura(double t){
 void setTensioneBatteria(double t){
   if (xSemaphoreTake(xMutexLettureSensori, pdMS_TO_TICKS(10)) == pdTRUE) {
     lettureSensori.tensioneBatteria = t;
-    lettureSensori.percentualeBatteria = (t - 3.38) / 0.8 * 100;
+    lettureSensori.percentualeBatteria = (t - 3.4) / (4.05 - 3.4) * 100;
     xSemaphoreGive(xMutexLettureSensori);
   }
 }
