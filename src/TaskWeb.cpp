@@ -5,13 +5,14 @@
 static AsyncWebServer server(80);
 static AsyncWebSocket ws("/ws");
 static status current_status;
-static status start_server(status s);
-static status websocket_idle(status s);
+static status webserver_start(status s);
+static status webserver_idle(status s);
+static status webserver_stop(status s);
 
 // --- Implementazione della funzione di avvio definita in Tasks.h ---
 void startTaskWeb() {
 
-    current_status = (status){.run = start_server};
+    current_status = (status){.run = webserver_start};
     xTaskCreatePinnedToCore(taskWebLoop, "Web", 8192, NULL, 1, NULL, 0);
 }
 
@@ -81,7 +82,7 @@ static const char index_html[] PROGMEM = R"rawliteral(
 </html>
 )rawliteral";
 
-static status start_server(status s){
+static status webserver_start(status s){
 
     StatoRete sr = getStatoRete();
     if(!sr.isWifiConnected and !sr.isStationMode) return s;
@@ -164,15 +165,18 @@ static status start_server(status s){
     server.begin();
 
 
-    return (status){.run = websocket_idle};
+    return (status){.run = webserver_idle};
 
 }
 
-static status websocket_idle(status s){
+static status webserver_idle(status s){
 
-    if(catchResetWeb()){
+    if(checkResetWeb()){
+        ws.closeAll(1001, "Server Reboot/Switch");
+        ws.enable(false);
+        server.removeHandler(&ws);
         server.end();
-        return (status){.run = start_server};
+        return (status){.run = webserver_stop};
     }
 
     LettureSensori l = getLettureSensori();
@@ -181,6 +185,22 @@ static status websocket_idle(status s){
     ",C:" + String(l.percentualeBatteria, 0);
     ws.textAll(payload);
     
+    return s;
+}
+
+static status webserver_stop(status s){
+    
+    //Attende che tutti i client si disconnettano
+    if (ws.count() > 0){
+        ws.closeAll(1001, "Server Reboot/Switch");
+        ws.enable(false);
+    } else {
+        server.removeHandler(&ws);
+        server.end();
+        s = (status){.run = webserver_start};
+        vTaskDelay(pdMS_TO_TICKS(50));
+        catchResetWeb(); // Pulisce il segnale di reset web
+    }
     return s;
 }
 

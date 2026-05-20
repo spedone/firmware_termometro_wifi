@@ -180,6 +180,13 @@ void sendDeepSleep(){
   }
 }
 
+void sendResetMqtt(){
+  if (xSemaphoreTake(xMutexSegnali, pdMS_TO_TICKS(10)) == pdTRUE) {
+    segnali.resetMqtt = true;
+    xSemaphoreGive(xMutexSegnali);
+  }
+}
+
 bool catchResetNetwork(){
   bool r = false;
   if (xSemaphoreTake(xMutexSegnali, pdMS_TO_TICKS(10)) == pdTRUE) {
@@ -200,11 +207,39 @@ bool catchResetWeb(){
   return r;
 }
 
+bool catchResetMqtt(){
+  bool r = false;
+  if (xSemaphoreTake(xMutexSegnali, pdMS_TO_TICKS(10)) == pdTRUE) {
+    r = segnali.resetMqtt;
+    segnali.resetMqtt = false;
+    xSemaphoreGive(xMutexSegnali);
+  }
+  return r;
+}
+
 bool catchDeepSleep(){
   bool r = false;
   if (xSemaphoreTake(xMutexSegnali, pdMS_TO_TICKS(10)) == pdTRUE) {
     r = segnali.deepSleep;
     segnali.deepSleep = false;
+    xSemaphoreGive(xMutexSegnali);
+  }
+  return r;
+}
+
+bool checkResetWeb(){
+  bool r = false;
+  if (xSemaphoreTake(xMutexSegnali, pdMS_TO_TICKS(10)) == pdTRUE) {
+    r = segnali.resetWeb;
+    xSemaphoreGive(xMutexSegnali);
+  }
+  return r;
+}
+
+bool checkResetMqtt(){
+  bool r = false;
+  if (xSemaphoreTake(xMutexSegnali, pdMS_TO_TICKS(10)) == pdTRUE) {
+    r = segnali.resetMqtt;
     xSemaphoreGive(xMutexSegnali);
   }
   return r;

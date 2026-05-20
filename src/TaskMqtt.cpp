@@ -13,7 +13,7 @@ static unsigned long delay_ciclo = 200;
 // Prototipi funzioni di stato
 static status mqtt_start(status s);
 static status mqtt_wait(status s);
-static status mqtt_client_mode(status s);
+static status mqtt_idle(status s);
 
 void startTaskMqtt(){
   current_status = (status){.run = mqtt_start};
@@ -31,8 +31,8 @@ void taskMqttLoop(void * pvParameters) {
 static status mqtt_start(status s) {
   
   setStatoMqtt(false);
-  delay_ciclo = 200;
   if(!getStatoRete().isWifiConnected) return s;
+
   ParametriConfigurazione p = getParametriConfigurazione();
   if(p.mqtt_hostname != "") {
     client.setServer(p.mqtt_hostname.c_str(), p.mqtt_port);
@@ -42,41 +42,48 @@ static status mqtt_start(status s) {
     else{ 
       client.connect("ESP32_Termo");
     }
-    timeout_mqtt = millis();
-    
+    s = (status){.run = mqtt_wait};
   }
-  
-  return (status){.run = mqtt_wait};
+  timeout_mqtt = millis();
+  delay_ciclo = 200;
+  return s;
 }
 
 static status mqtt_wait(status s) {
   
-  if(millis() - timeout_mqtt > 10000) return (status){.run = mqtt_start};
-  if(client.connected()){
-    setStatoMqtt(true);
-    return (status){.run = mqtt_client_mode};
-  }
-
+  if(client.connected())
+    s = (status){.run = mqtt_idle};
+  
+  if(millis() - timeout_mqtt > 10000) 
+    s = (status){.run = mqtt_start};
+  
   delay_ciclo = 500;
   return s;
 }
 
-static status mqtt_client_mode(status s) {
+static status mqtt_idle(status s) {
   
-  if(!client.connected()) return (status){.run = mqtt_start};
-  client.loop();
-  ParametriConfigurazione p = getParametriConfigurazione();
-  char message[100];
-  LettureSensori l = getLettureSensori();
-  sprintf(
-    message, "{\"temperatura\": %.1f, \"tensioneBatteria\": %.2f, \"percentualeBatteria\": %.2f}", 
-    l.temperatura, 
-    l.tensioneBatteria, 
-    l.percentualeBatteria
+  if(checkResetMqtt()) {
+    client.disconnect(); 
+  }
+  if(client.connected()){
+    setStatoMqtt(true);
+    client.loop();
+    ParametriConfigurazione p = getParametriConfigurazione();
+    char message[100];
+    LettureSensori l = getLettureSensori();
+    sprintf(
+      message, "{\"temperatura\": %.1f, \"tensioneBatteria\": %.2f, \"percentualeBatteria\": %.2f}", 
+      l.temperatura, 
+      l.tensioneBatteria, 
+      l.percentualeBatteria
     );
-  
-  client.publish(p.mqtt_endpoint.c_str(),message);
-  
+    client.publish(p.mqtt_endpoint.c_str(),message);
+  } else {
+    catchResetWeb();
+    s = (status){.run = mqtt_start};
+  }
+
   delay_ciclo = 5000;
   return s;
 }

@@ -31,6 +31,7 @@ typedef struct s_stato_rete {
 typedef struct s_segnali {
     bool resetNetwork;           
     bool resetWeb;
+    bool resetMqtt;
     bool deepSleep;
 } Segnali;
 
@@ -62,10 +63,16 @@ void setStatoMqtt(bool isMqttConnected);
 
 void sendResetNetwork();
 void sendResetWeb();
+void sendResetMqtt();
 void sendDeepSleep();
 
 bool catchResetNetwork();
 bool catchResetWeb();
+bool catchResetMqtt();
+
+bool checkResetWeb();
+bool checkResetMqtt();
+
 bool catchDeepSleep();
 
 

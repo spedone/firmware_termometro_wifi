@@ -7,6 +7,7 @@ void setup() {
 
   loadParametriConfigurazione();
   Serial.begin(115200);
+  setCpuFrequencyMhz(80); 
 
   startTaskNetwork();
   startTaskMqtt();
