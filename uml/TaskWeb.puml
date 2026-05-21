@@ -1,17 +1,22 @@
 @startuml TaskWeb_State_Machine
-title Diagramma di stato - Task Web
-[*] --> start_server
+title FMW_TWIFI_ARDESP32 v. 1.2  - Task Web
+[*] --> webserver_start
 
-state start_server {
-  start_server : Configura Routes (/ , /config)
-  start_server : Avvia WebServer e WS
-}
+state webserver_start
+webserver_start : * Programma callback routes 
+webserver_start : * Avvia WebServer e WS
+webserver_start --> webserver_idle : server avviato
 
-state websocket_idle {
-  websocket_idle : Invia letture sensori via WS
-}
 
-start_server --> websocket_idle : server avviato
-websocket_idle --> start_server : Segnale resetWeb
-websocket_idle --> websocket_idle : Loop invio (500ms)
+state webserver_idle
+webserver_idle : * Send sensor data to websockets
+webserver_idle --> webserver_stop : Segnale resetWeb
+webserver_idle --> webserver_idle : lettura inviata
+
+state webserver_stop
+webserver_stop : * Send closeAll signal
+webserver_stop --> webserver_stop : ws.count() > 0
+webserver_stop : * Remove wsocket handle and shutdown webserver
+webserver_stop --> webserver_start : webserver down
+
 @enduml

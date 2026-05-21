@@ -1,5 +1,6 @@
 @startuml TaskBatteria_State
-title Diagramma di stato - Task Batteria
+title FMW_TWIFI_ARDESP32 v. 1.2 - Task Batteria
+
 
 [*] --> battery_idle
 
@@ -8,6 +9,11 @@ state battery_idle{
   battery_idle: calcolo percentuale
   battery_idle: aggiorna variab.condivisa
 }
+
+state battery_read{
+  
+}
+
 state deep_sleep_mode{
   deep_sleep_mode: segnale deepSleep = true 
   deep_sleep_mode: attesa 5 secondi
@@ -16,6 +22,11 @@ state deep_sleep_mode{
 }
 
 
-battery_idle --> battery_idle : tensione >= 3.4 V
-battery_idle --> deep_sleep_mode : tensione < 3.4 V
+battery_idle --> battery_idle : Attesa 15 sec
+battery_idle --> battery_read : timeout 15 sec 
+battery_idle --> battery_read : prima lettura
+
+battery_read --> battery_idle : tensione > 3.39 V
+battery_read --> deep_sleep_mode : tensione <= 3.39 V
+
 @enduml

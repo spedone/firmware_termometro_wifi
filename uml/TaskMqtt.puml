@@ -1,26 +1,25 @@
 @startuml
-title Diagramma di Stato - Task MQTT
+title FMW_TWIFI_ARDESP32 v. 1.2 - Task MQTT
 
-[*] --> mqtt_start : Avvio Task
+[*] --> mqtt_start 
 
-state mqtt_start {
-  mqtt_start : Configurazione server e credenziali
-}
+state mqtt_start 
+mqtt_start : * Update global status
+mqtt_start : * Begin connection
+mqtt_start : * Set connection timeout
+mqtt_start --> mqtt_start : Network OFF
+mqtt_start --> mqtt_wait : Network ON
 
-mqtt_start --> mqtt_wait : client.connect()
+state mqtt_wait 
+mqtt_wait --> mqtt_idle : Connected
+mqtt_wait --> mqtt_start : expired timeout 5 sec
 
-state mqtt_wait {
-  mqtt_wait : Attesa ack dal broker
-}
+state mqtt_idle
+mqtt_idle : * Send JSON data 
+mqtt_idle : * Blink blue led
+mqtt_idle : * Set delay timeout
+mqtt_idle --> mqtt_start : Connection lost
+mqtt_idle --> mqtt_idle : repeat after 5 sec 
 
-mqtt_wait --> mqtt_client_mode : Connesso
-mqtt_wait --> mqtt_start : Timeout > 5 secondi
-
-state mqtt_client_mode {
-  mqtt_client_mode : Invio JSON dati sensori (ogni 5s)
-}
-
-mqtt_client_mode --> mqtt_start : Connessione persa
-mqtt_client_mode --> mqtt_client_mode : Loop di pubblicazione
 
 @enduml

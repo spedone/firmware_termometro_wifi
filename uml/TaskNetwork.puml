@@ -1,29 +1,35 @@
 @startuml
-title Diagramma di stato - Task Network
+title FMW_TWIFI_ARDESP32 v. 1.2 - Task Network
+
 [*] --> wifi_start
 
-state wifi_start {
-   wifi_start: avvia connessione
-}
+state wifi_start 
+wifi_start : * Wait for Webserver and Mqtt closing  
+wifi_start : * Turn off Wifi Antenna if still ON
+wifi_start : * Update Network global status 
+wifi_start : * Begin Wifi as station 
+wifi_start --> wifi_start : Web server or Mqtt still running
+wifi_start --> ap_mode_start : if wifi_ssid = ""
+wifi_start --> wifi_wait : STA starting
 
 state wifi_wait
-state wifi_idle
+wifi_wait --> wifi_wait : waiting for connection
+wifi_wait --> wifi_idle : connected 
+wifi_wait --> ap_mode_start : expired timeout 10 sec
 
-state ap_mode_start {
-   ap_mode_start: avvia access point
-}
+state wifi_idle
+wifi_idle : * Update Network global status
+wifi_idle --> wifi_start : WiFi goes down or reset Network request
+
+
+state ap_mode_start 
+ap_mode_start : * Update Network global status
+ap_mode_start : * Begin Wifi as access point 
+ap_mode_start --> ap_mode_idle : AP starting
 
 state ap_mode_idle
-
-wifi_start --> ap_mode_start : if wifi_ssid = ""
-wifi_start --> wifi_wait : richiesta effettuata
-wifi_wait --> wifi_wait : loop attesa connessione
-wifi_wait --> wifi_idle : wifi connected 
-wifi_wait --> ap_mode_start : if timout > 10 sec
-wifi_idle --> wifi_start : wifi not connected || resetNetwork
-wifi_idle --> wifi_idle : loop monitoraggio connessione
-ap_mode_start --> ap_mode_idle
-ap_mode_idle --> wifi_start : resetNetwork
-ap_mode_idle --> ap_mode_idle : loop attesa resetNetwork 
+ap_mode_idle : * Update Network global status
+ap_mode_idle --> wifi_start : reset Network request
+ap_mode_idle --> ap_mode_idle 
 
 @enduml
