@@ -5,14 +5,14 @@
 
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
 
-static status display_idle(status s);
-static status display_deep_sleep(status s);
-static status current_status;
+static task_status display_idle(task_status s);
+static task_status display_deep_sleep(task_status s);
+static task_status current_status;
 
 void startTaskDisplay(){
 
     u8g2.begin();
-    current_status = (status){.run = display_idle};
+    current_status = (task_status){.run = display_idle};
     xTaskCreatePinnedToCore(taskDisplayLoop, "Display", 8192, NULL, 1, NULL, 1);
 }
 
@@ -25,9 +25,9 @@ void taskDisplayLoop(void * pvParameters){
    
 }
 
-static status display_idle(status s){
+static task_status display_idle(task_status s){
 
-    if(catchDeepSleep()) return (status){.run = display_deep_sleep};
+    if(catchDeepSleep()) return (task_status){.run = display_deep_sleep};
     u8g2.clearBuffer();
     u8g2.setFont(u8g2_font_open_iconic_all_1x_t);
 
@@ -79,7 +79,7 @@ static status display_idle(status s){
     return s;
 }
 
-static status display_deep_sleep(status s){
+static task_status display_deep_sleep(task_status s){
     u8g2.clearBuffer();
     u8g2.setFont(u8g2_font_battery24_tr);
     u8g2.drawGlyph(50, 45, 0x3d);

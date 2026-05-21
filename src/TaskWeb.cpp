@@ -1,18 +1,20 @@
 #include <ESPAsyncWebServer.h>
+#include <LittleFS.h>
 #include "GlobalData.h"
 #include "Tasks.h"
 
 static AsyncWebServer server(80);
 static AsyncWebSocket ws("/ws");
-static status current_status;
-static status webserver_start(status s);
-static status webserver_idle(status s);
-static status webserver_stop(status s);
+static task_status current_status;
+static task_status webserver_start(task_status s);
+static task_status webserver_idle(task_status s);
+static task_status webserver_stop(task_status s);
+
 
 // --- Implementazione della funzione di avvio definita in Tasks.h ---
 void startTaskWeb() {
 
-    current_status = (status){.run = webserver_start};
+    current_status = (task_status){.run = webserver_start};
     xTaskCreatePinnedToCore(taskWebLoop, "Web", 8192, NULL, 1, NULL, 0);
 }
 
@@ -82,14 +84,14 @@ static const char index_html[] PROGMEM = R"rawliteral(
 </html>
 )rawliteral";
 
-static status webserver_start(status s){
+static task_status webserver_start(task_status s){
 
     StatoRete sr = getStatoRete();
     if(!sr.isWifiConnected and !sr.isStationMode) return s;
 
     // ROUTE: Serve Main Page with dynamic placeholders
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-        request->send_P(200, "text/html", index_html,
+    server.on("/", WebRequestMethod::HTTP_GET, [](AsyncWebServerRequest *request){
+        request->send(200, "text/html", index_html,
             [](const String& var){
                 ParametriConfigurazione p = getParametriConfigurazione();
                 StatoRete sr = getStatoRete();
@@ -109,7 +111,7 @@ static status webserver_start(status s){
         );
     });
 
-    server.on("/config", HTTP_POST, [](AsyncWebServerRequest *request) {
+    server.on("/config", WebRequestMethod::HTTP_POST, [](AsyncWebServerRequest *request) {
 
         ParametriConfigurazione p;
         StatoRete s = getStatoRete();
@@ -165,18 +167,18 @@ static status webserver_start(status s){
     server.begin();
 
 
-    return (status){.run = webserver_idle};
+    return (task_status){.run = webserver_idle};
 
 }
 
-static status webserver_idle(status s){
+static task_status webserver_idle(task_status s){
 
     if(checkResetWeb()){
         ws.closeAll(1001, "Server Reboot/Switch");
         ws.enable(false);
         server.removeHandler(&ws);
         server.end();
-        return (status){.run = webserver_stop};
+        return (task_status){.run = webserver_stop};
     }
 
     LettureSensori l = getLettureSensori();
@@ -188,7 +190,7 @@ static status webserver_idle(status s){
     return s;
 }
 
-static status webserver_stop(status s){
+static task_status webserver_stop(task_status s){
     
     //Attende che tutti i client si disconnettano
     if (ws.count() > 0){
@@ -197,7 +199,7 @@ static status webserver_stop(status s){
     } else {
         server.removeHandler(&ws);
         server.end();
-        s = (status){.run = webserver_start};
+        s = (task_status){.run = webserver_start};
         vTaskDelay(pdMS_TO_TICKS(50));
         catchResetWeb(); // Pulisce il segnale di reset web
     }

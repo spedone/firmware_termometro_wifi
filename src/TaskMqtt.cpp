@@ -3,7 +3,7 @@
 #include "GlobalData.h"
 #include "Tasks.h"     
 
-static status current_status;
+static task_status current_status;
 
 static WiFiClient esp32_client;
 static PubSubClient client(esp32_client);
@@ -11,13 +11,13 @@ static unsigned long timeout_mqtt;
 static int timout_lettura;
 
 // Prototipi funzioni di stato
-static status mqtt_start(status s);
-static status mqtt_wait(status s);
-static status mqtt_idle(status s);
+static task_status mqtt_start(task_status s);
+static task_status mqtt_wait(task_status s);
+static task_status mqtt_idle(task_status s);
 
 void startTaskMqtt(){
   pinMode(LED_BLUE, OUTPUT);
-  current_status = (status){.run = mqtt_start};
+  current_status = (task_status){.run = mqtt_start};
   xTaskCreatePinnedToCore(taskMqttLoop, "Mqtt", 8192, NULL, 1, NULL, 0);
 }
 
@@ -29,7 +29,7 @@ void taskMqttLoop(void * pvParameters) {
 }
 
 
-static status mqtt_start(status s) {
+static task_status mqtt_start(task_status s) {
   
   setStatoMqtt(false);
   catchResetMqtt();
@@ -45,30 +45,30 @@ static status mqtt_start(status s) {
     else{ 
       client.connect(MODEL_NAME "-" SERIAL_NR);
     }
-    s = (status){.run = mqtt_wait};
+    s = (task_status){.run = mqtt_wait};
   }
   timeout_mqtt = millis();
   return s;
 }
 
-static status mqtt_wait(status s) {
+static task_status mqtt_wait(task_status s) {
   
   if(client.connected())
-    s = (status){.run = mqtt_idle};
+    s = (task_status){.run = mqtt_idle};
   
   if(millis() - timeout_mqtt > 10000) 
-    s = (status){.run = mqtt_start};
+    s = (task_status){.run = mqtt_start};
   
   return s;
 }
 
-static status mqtt_idle(status s) {
+static task_status mqtt_idle(task_status s) {
   
   setStatoMqtt(true);
 
   if(!client.connected() || checkResetMqtt()) {
     client.disconnect(); 
-    s = (status){.run = mqtt_start};
+    s = (task_status){.run = mqtt_start};
   }else{
     client.loop();
     digitalWrite(LED_BLUE, HIGH);

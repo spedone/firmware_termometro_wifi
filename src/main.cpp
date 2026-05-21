@@ -12,10 +12,11 @@ void setup() {
   startTaskNetwork();
   startTaskMqtt();
   startTaskWeb();
-
+  startTaskOTA();
   startTaskTemperatura();
   startTaskBatteria();
   startTaskDisplay();
+
 }
 
 void loop() {
