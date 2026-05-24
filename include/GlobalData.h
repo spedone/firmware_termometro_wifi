@@ -55,7 +55,7 @@ void loadParametriConfigurazione();
 void saveParametriConfigurazione(ParametriConfigurazione p);
 
 void setTemperatura(double t);
-void setTensioneBatteria(double t);
+void setValoriBatteria(double t, double p);
 void setErroreTemperatura(bool r);
 
 void setStatoWifi(String mac_address, bool isStationMode, String ip_address, bool isWifiConnected);

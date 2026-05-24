@@ -8,6 +8,24 @@ static task_status deep_sleep_mode(task_status s);
 static double tensione;
 static int timeout_reading;
 static int read_counter;
+static double percentuale(double tensione);
+
+static double percentuale(double tensione){
+  static double coefficienti[7] = {
+    -610.42283, // x^0
+    0.00000,  // x^1
+    641.97334,	// x^2
+    -452.35578,	// x^3
+    134.25149,	// x^4
+    -18.85837,	// x^5
+    1.03345,  // x^6
+  };
+  double p = 0;
+  for(int i = 0; i < 7; i++){
+    p += coefficienti[i] * pow(tensione, i);
+  }
+  return constrain(p*100, 0, 100);
+}
 
 void startTaskBatteria(){
   pinMode(A6, OUTPUT);
@@ -48,7 +66,7 @@ static task_status battery_read(task_status s){
   }else {
     ParametriConfigurazione p = getParametriConfigurazione();
     tensione = (tensione * 3.3 * p.k_divider) / 7;
-    setTensioneBatteria(tensione);
+    setValoriBatteria(tensione, percentuale(tensione));
     digitalWrite(A6, LOW); //Apre il partitore
     timeout_reading = millis();
     read_counter = 0;
