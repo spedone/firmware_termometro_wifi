@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TWIFI-ARDESP32</title>
+    
+    <style>
+        body {
+            background-color: #f3f4f6;
+            color: #1f2937;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* Barra di navigazione superiore */
+        .navbar {
+            background-color: #2563eb;
+            color: #ffffff;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        /* Pulsantiera a schede (Tab Navigation) */
+        .tab-container {
+            display: flex;
+            gap: 5px;
+        }
+
+        .tab-button {
+            background-color: transparent;
+            border: none;
+            color: #bfdbfe;
+            padding: 8px 16px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .tab-button:hover {
+            background-color: #1d4ed8;
+            color: #ffffff;
+        }
+
+        .tab-button.active {
+            background-color: #ffffff;
+            color: #2563eb;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .logout-button {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-left: 10px;
+        }
+
+        .logout-button:hover {
+            background-color: #dc2626;
+        }
+
+        /* Layout Contenitore */
+        .main-container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 15px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Schermata di Login */
+        .login-box {
+            max-width: 380px;
+            margin: 50px auto 0 auto;
+        }
+
+        .login-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        /* Container per password con visibilità commutabile */
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-toggle-btn {
+            position: absolute;
+            right: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #4b5563;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 4px 8px;
+            user-select: none;
+        }
+
+        .password-toggle-btn:hover {
+            color: #2563eb;
+        }
+
+        /* Griglia Box Quadrati */
+        .monitor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .square-card {
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        .square-card-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #6b7280;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .square-card-value {
+            font-size: 1.75rem;
+            font-weight: bold;
+            color: #111827;
+        }
+
+        .square-card-sub {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        /* Layout Strisce Orizzontali (Info Dispositivo) */
+        .info-strips-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .strip-card {
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        .strip-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #4b5563;
+        }
+
+        .strip-value {
+            font-size: 0.95rem;
+            font-family: monospace;
+            color: #111827;
+            background-color: #f3f4f6;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        /* Indicatori di Stato */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 6px 16px;
+            border-radius: 20px;
+        }
+        
+        .status-on {
+            background-color: #dcfce7;
+            color: #16a34a;
+        }
+
+        .status-off {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+
+        /* Sottomenu Impostazioni */
+        .sub-tab-container {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .sub-tab-button {
+            background: none;
+            border: none;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            color: #4b5563;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .sub-tab-button:hover {
+            background-color: #e5e7eb;
+        }
+
+        .sub-tab-button.active {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+            font-weight: bold;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+
+        .btn-success {
+            background-color: #22c55e;
+            color: white;
+            width: auto;
+            padding: 10px 20px;
+        }
+
+        .btn-success:hover {
+            background-color: #16a34a;
+        }
+
+        .error-text {
+            color: #ef4444;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .success-text {
+            color: #16a34a;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+    </style>
+
+    <script src="vue.global.prod.js"></script>
+</head>
+<body>
+
+    <div id="app">
+        
+        <nav class="navbar">
+            <span class="navbar-brand">TWIFI-ARDESP32 <small>firmware ver. 1.2.0</small></span>
+            <div v-if="token" class="tab-container">
+                <button @click="currentTab = 'home'" :class="{ active: currentTab === 'home' }" class="tab-button">Home</button>
+                <button @click="currentTab = 'settings'" :class="{ active: currentTab === 'settings' }" class="tab-button">Impostazioni</button>
+                <button @click="logout" class="logout-button">Esci</button>
+            </div>
+        </nav>
+
+        <div class="main-container">
+            
+            <div v-if="!token" class="card login-box">
+                <h2 class="login-title">Accesso Richiesto</h2>
+                <div class="form-group">
+                    <label>Inserisci Password Hardware</label>
+                    <div class="password-wrapper">
+                        <input :type="showLoginPassword ? 'text' : 'password'" v-model="password" class="form-control" @keyup.enter="login" placeholder="••••••••" style="padding-right: 65px;">
+                        <button type="button" class="password-toggle-btn" @click="showLoginPassword = !showLoginPassword">
+                            {{ showLoginPassword ? 'Nascondi' : 'Mostra' }}
+                        </button>
+                    </div>
+                </div>
+                <button @click="login" class="btn btn-primary">Accedi</button>
+                <p v-if="error" class="error-text">{{ error }}</p>
+            </div>
+
+            <div v-else>
+                
+                <div v-if="currentTab === 'home'">
+                    <h3>Stato Sistema</h3>
+
+                    <div class="info-strips-container">
+                        <div class="strip-card">
+                            <span class="strip-label">Numero di Serie Hardware</span>
+                            <span class="strip-value">{{ serialNumber }}</span>
+                        </div>
+                        <div class="strip-card">
+                            <span class="strip-label">Indirizzo MAC Dispositivo</span>
+                            <span class="strip-value">{{ macAddress }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="monitor-grid">
+                        <div class="square-card">
+                            <span class="square-card-label">Temperatura</span>
+                            <span class="square-card-value">{{Number(temperatura).toFixed(1)}} <span style="font-size: 1.2rem; font-weight: normal;">°C</span></span>
+                        </div>
+
+                        <div class="square-card">
+                            <span class="square-card-label">Batteria</span>
+                            <span class="square-card-value">{{Number(percentualeBatteria).toFixed(0)}}<span style="font-size: 1.2rem; font-weight: normal;">%</span></span>
+                            <span class="square-card-sub">{{Number(tensioneBatteria).toFixed(2)}} V</span>
+                        </div>
+
+                        <div class="square-card">
+                            <span class="square-card-label">Stato WiFi</span>
+                            <span class="status-badge" :class="isWiFiOn ? 'status-on' : 'status-off'">
+                                {{isWiFiOn ? 'ON' : 'OFF'}}
+                            </span>
+                        </div>
+
+                        <div class="square-card">
+                            <span class="square-card-label">Stato MQTT</span>
+                            <span class="status-badge" :class="isMQTTOn ? 'status-on' : 'status-off'">
+                                {{isMQTTOn ? 'ON' : 'OFF'}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="currentTab === 'settings'" class="card">
+                    <h3>Configurazione Parametri</h3>
+                    
+                    <div class="sub-tab-container">
+                        <button @click="currentSettingsSubTab = 'network'" :class="{ active: currentSettingsSubTab === 'network' }" class="sub-tab-button">Parametri di Rete</button>
+                        <button @click="currentSettingsSubTab = 'calibration'" :class="{ active: currentSettingsSubTab === 'calibration' }" class="sub-tab-button">Calibrazione Sensori</button>
+                    </div>
+
+                    <div v-if="currentSettingsSubTab === 'network'">
+                        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 20px;">Configura le credenziali della rete locale e i parametri del Broker MQTT.</p>
+                        
+                        <div class="form-group">
+                            <label>SSID WiFi</label>
+                            <input type="text" v-model="netSettings.ssid" class="form-control" placeholder="Caricamento...">
+                        </div>
+                        <div class="form-group">
+                            <label>Password WiFi</label>
+                            <div class="password-wrapper">
+                                <input :type="showWifiPassword ? 'text' : 'password'" v-model="netSettings.password" class="form-control" placeholder="••••••••" style="padding-right: 65px;">
+                                <button type="button" class="password-toggle-btn" @click="showWifiPassword = !showWifiPassword">
+                                    {{ showWifiPassword ? 'Nascondi' : 'Mostra' }}
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Broker MQTT (IP o URL)</label>
+                            <input type="text" v-model="netSettings.mqttBroker" class="form-control" placeholder="Caricamento...">
+                        </div>
+                        <div class="form-group">
+                            <label>Porta MQTT</label>
+                            <input type="number" v-model="netSettings.mqttPort" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Endpoint MQTT</label>
+                            <input type="text" v-model="netSettings.mqttEndpoint" class="form-control" placeholder="Caricamento...">
+                        </div>
+                        <div class="form-group">
+                            <label>Username MQTT</label>
+                            <input type="text" v-model="netSettings.mqttUsername" class="form-control" placeholder="Caricamento...">
+                        </div>
+                        <div class="form-group">
+                            <label>Password MQTT</label>
+                            <div class="password-wrapper">
+                                <input :type="showMqttPassword ? 'text' : 'password'" v-model="netSettings.mqttPassword" class="form-control" placeholder="••••••••" style="padding-right: 65px;">
+                                <button type="button" class="password-toggle-btn" @click="showMqttPassword = !showMqttPassword">
+                                    {{ showMqttPassword ? 'Nascondi' : 'Mostra' }}
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <button @click="saveNetworkSettings" class="btn btn-success" style="margin-top: 10px;">Salva Rete</button>
+                    </div>
+
+                    <div v-if="currentSettingsSubTab === 'calibration'">
+                        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 20px;">Inserisci i valori di offset o moltiplicatori per tarare le letture analogiche della scheda.</p>
+                        
+                        <div class="form-group">
+                            <label>Costante divisore tensione</label>
+                            <input type="number" step="0.1" v-model="calSettings.k_divider" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Resistenza di riferimento temperatura</label>
+                            <input type="number" step="0.01" v-model="calSettings.r_ref" class="form-control">
+                        </div>
+                        
+                        <button @click="saveCalibrationSettings" class="btn btn-success" style="margin-top: 10px;">Salva Calibrazione</button>
+                    </div>
+
+                    <p v-if="settingsFeedback" class="success-text">{{ settingsFeedback }}</p>
+                    <p v-if="settingsError" class="error-text">{{ settingsError }}</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref } = Vue;
+
+        createApp({
+            setup() {
+                const currentTab = ref('home'); 
+                const currentSettingsSubTab = ref('network');
+                const token = ref(localStorage.getItem('jwt_token') || null);
+                const password = ref('');
+                const error = ref('');
+                
+                // Variabili reattive per mostrare/nascondere le password
+                const showLoginPassword = ref(false);
+                const showWifiPassword = ref(false);
+                const showMqttPassword = ref(false);
+
+                const settingsFeedback = ref('');
+                const settingsError = ref('');
+
+                const netSettings = ref({ ssid: '', password: '', mqttBroker: '', mqttPort: 1883, mqttEndpoint: '', mqttUsername: '', mqttPassword: '' });
+                const calSettings = ref({ k_divider: 0.0, r_ref: 0.0 });
+                
+                const temperatura = ref('N/A');
+                const tensioneBatteria = ref('N/A');
+                const percentualeBatteria = ref('N/A');
+                const isWiFiOn = ref(false);
+                const isMQTTOn = ref(false);
+
+                const serialNumber = ref('Caricamento...');
+                const macAddress = ref('Caricamento...');
+
+                let ws = null;
+
+                // Recupera le configurazioni attuali dal server REST JSON
+                const loadCurrentSettings = async () => {
+                    if (!token.value) return;
+                    try {
+                        // Richiesta parametri di rete
+                        const netRes = await fetch('/api/settings/network', {
+                            headers: { 'Authorization': `Bearer ${token.value}` }
+                        });
+                        if (netRes.ok) {
+                            const netData = await netRes.json();
+                            netSettings.value.ssid = netData.ssid || '';
+                            netSettings.value.password = netData.password || '';
+                            netSettings.value.mqttBroker = netData.mqttBroker || '';
+                            netSettings.value.mqttPort = netData.mqttPort || 1883;
+                            netSettings.value.mqttEndpoint = netData.mqttEndpoint || '';
+                            netSettings.value.mqttUsername = netData.mqttUsername || '';
+                            netSettings.value.mqttPassword = netData.mqttPassword || '';
+                        }
+
+                        // Richiesta parametri calibrazione
+                        const calRes = await fetch('/api/settings/calibration', {
+                            headers: { 'Authorization': `Bearer ${token.value}` }
+                        });
+                        if (calRes.ok) {
+                            const calData = await calRes.json();
+                            calSettings.value.k_divider = calData.k_divider || 0.0;
+                            calSettings.value.r_ref = calData.r_ref || 0.0;
+                        }
+                    } catch (err) {
+                        console.error("Errore nel caricamento dei dati di precompilazione:", err);
+                    }
+                };
+
+                const connectWebSocket = () => {
+                    if (!token.value) return;
+
+                    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                    const wsUrl = `${protocol}//${window.location.host}/ws?token=${encodeURIComponent(token.value)}`;
+
+                    ws = new WebSocket(wsUrl);
+
+                    ws.onmessage = (event) => {
+                        try {
+                            const data = JSON.parse(event.data);
+                            if (data.type === 'telemetry') {
+                                temperatura.value = data.temp;
+                                tensioneBatteria.value = data.volt;
+                                percentualeBatteria.value = data.batt_pct;
+                                isWiFiOn.value = data.wifi;
+                                isMQTTOn.value = data.mqtt;
+                                
+                                serialNumber.value = data.sn || 'N/A';
+                                macAddress.value = data.mac || 'N/A';
+                            }
+                        } catch (err) {
+                            console.error("Errore parser WS:", err);
+                        }
+                    };
+
+                    ws.onclose = () => {
+                        if (token.value) setTimeout(connectWebSocket, 3000);
+                    };
+                };
+
+                const login = async () => {
+                    try {
+                        error.value = '';
+                        const response = await fetch('/api/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ password: password.value })
+                        });
+                        if (!response.ok) throw new Error('Password errata');
+                        
+                        const data = await response.json();
+                        token.value = data.token;
+                        localStorage.setItem('jwt_token', data.token);
+                        password.value = '';
+                        showLoginPassword.value = false; // Ripristina lo stato nascosto
+
+                        connectWebSocket();
+                        loadCurrentSettings(); // Precompila i form subito dopo l'autenticazione
+                    } catch (err) {
+                        error.value = err.message;
+                    }
+                };
+
+                const saveNetworkSettings = async () => {
+                    try {
+                        settingsFeedback.value = ''; settingsError.value = '';
+                        const response = await fetch('/api/settings/network', {
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token.value}`
+                            },
+                            body: JSON.stringify(netSettings.value)
+                        });
+                        if (!response.ok) throw new Error('Errore di salvataggio');
+                        settingsFeedback.value = 'Parametri di rete aggiornati con successo!';
+                    } catch (err) {
+                        settingsError.value = err.message;
+                    }
+                };
+
+                const saveCalibrationSettings = async () => {
+                    try {
+                        settingsFeedback.value = ''; settingsError.value = '';
+                        const response = await fetch('/api/settings/calibration', {
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token.value}`
+                            },
+                            body: JSON.stringify(calSettings.value)
+                        });
+                        if (!response.ok) throw new Error('Errore di calibrazione');
+                        settingsFeedback.value = 'Calibrazione salvata!';
+                    } catch (err) {
+                        settingsError.value = err.message;
+                    }
+                };
+
+                const logout = () => {
+                    if (ws) { ws.close(); ws = null; }
+                    token.value = null;
+                    localStorage.removeItem('jwt_token');
+                    currentTab.value = 'home';
+                    showWifiPassword.value = false;
+                };
+
+                if (token.value) {
+                    connectWebSocket();
+                    loadCurrentSettings(); // Esegue la chiamata all'avvio se la sessione è già attiva
+                }
+
+                return { 
+                    currentTab, currentSettingsSubTab, token, password, error, 
+                    showLoginPassword, showWifiPassword, showMqttPassword,
+                    settingsFeedback, settingsError, netSettings, calSettings,
+                    temperatura, tensioneBatteria, percentualeBatteria, isWiFiOn, isMQTTOn,
+                    serialNumber, macAddress, login, logout, saveNetworkSettings, saveCalibrationSettings 
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

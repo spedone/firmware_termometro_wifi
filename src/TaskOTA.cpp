@@ -26,11 +26,10 @@ static task_status ota_wait(task_status s){
     
     StatoRete sr = getStatoRete();
 
-    if(sr.isWifiConnected || sr.isStationMode)
-        s = (task_status){.run = ota_idle};
-
-    ArduinoOTA.begin();
-    
+    if(sr.isWifiConnected || sr.isStationMode){
+      s = (task_status){.run = ota_idle};
+      ArduinoOTA.begin();
+    }
     return s;
 }
 
