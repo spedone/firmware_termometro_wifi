@@ -78,7 +78,8 @@ static task_status mqtt_idle(task_status s) {
       char message[100];
       LettureSensori l = getLettureSensori();
       sprintf(
-        message, "{\"T\": %.1f, \"V_BAT\": %.2f, \"PC_BAT\": %.2f}", 
+        message, "{\"T_RATIO\": %lu, \"T\": %.1f, \"V_BAT\": %.2f, \"PC_BAT\": %.2f}", 
+        l.t_ratio,
         l.temperatura, 
         l.tensioneBatteria, 
         l.percentualeBatteria

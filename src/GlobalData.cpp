@@ -4,6 +4,8 @@
 Preferences pref;
 
 static LettureSensori lettureSensori = (LettureSensori){
+  .temperatura = 0.0,
+  .t_ratio = 0,
   .tensioneBatteria = 0.0,
   .percentualeBatteria = 0.0,
   .erroreTemperatura = false,
@@ -38,6 +40,7 @@ LettureSensori getLettureSensori(){
     lett.tensioneBatteria = lettureSensori.tensioneBatteria;
     lett.percentualeBatteria = lettureSensori.percentualeBatteria;
     lett.erroreTemperatura = lettureSensori.erroreTemperatura;
+    lett.t_ratio = lettureSensori.t_ratio;
     xSemaphoreGive(xMutexLettureSensori);
   }
   return lett;
@@ -80,6 +83,8 @@ ParametriConfigurazione getParametriConfigurazione(){
     p.mqtt_password = parametriConfigurazione.mqtt_password;
     p.k_divider = parametriConfigurazione.k_divider;
     p.r_ref = parametriConfigurazione.r_ref;
+    p.a1 = parametriConfigurazione.a1;
+    p.a0 = parametriConfigurazione.a0;
     xSemaphoreGive(xMutexParametriConfigurazione);
   }
 
@@ -99,6 +104,8 @@ void loadParametriConfigurazione(){
     parametriConfigurazione.mqtt_password = pref.getString("mqtt_password", "");
     parametriConfigurazione.k_divider = pref.getDouble("k_divider", 2.13);
     parametriConfigurazione.r_ref = pref.getInt("r_ref", 430);
+    parametriConfigurazione.a1 = pref.getDouble("a1", 0.0);
+    parametriConfigurazione.a0 = pref.getDouble("a0", 0.0);
     pref.end();
     xSemaphoreGive(xMutexParametriConfigurazione);
   }
@@ -117,13 +124,16 @@ void saveParametriConfigurazione(ParametriConfigurazione p){
   pref.putString("mqtt_password", p.mqtt_password);
   pref.putDouble("k_divider", p.k_divider);
   pref.putInt("r_ref", p.r_ref);
+  pref.putDouble("a1", p.a1);
+  pref.putDouble("a0", p.a0);
   pref.end();
 }
 
 
-void setTemperatura(double t){
+void setTemperatura(double t, unsigned long t_ratio){
   if (xSemaphoreTake(xMutexLettureSensori, pdMS_TO_TICKS(10)) == pdTRUE) {
     lettureSensori.temperatura = t;
+    lettureSensori.t_ratio = t_ratio;
     xSemaphoreGive(xMutexLettureSensori);
   }
 }

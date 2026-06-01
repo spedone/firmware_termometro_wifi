@@ -115,6 +115,8 @@ static task_status webserver_start(task_status s){
         JsonDocument doc;
         doc["k_divider"] = p.k_divider;
         doc["r_ref"] = p.r_ref; 
+        doc["a1"] = p.a1;
+        doc["a0"] = p.a0;
 
         String response;
         serializeJson(doc, response);
@@ -172,6 +174,8 @@ static task_status webserver_start(task_status s){
             // Sostituito .containsKey con il controllo nativo v7 .is<double>()
             if (doc["k_divider"].is<double>()) p.k_divider = doc["k_divider"].as<double>();
             if (doc["r_ref"].is<double>()) p.r_ref = doc["r_ref"].as<double>();
+            if (doc["a1"].is<double>()) p.a1 = doc["a1"].as<double>();
+            if (doc["a0"].is<double>()) p.a0 = doc["a0"].as<double>();
 
             saveParametriConfigurazione(p);
             loadParametriConfigurazione();

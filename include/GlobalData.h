@@ -13,7 +13,8 @@
 #include <Arduino.h>
 
 typedef struct s_letture_sensori {
-    double temperatura;        
+    double temperatura;      
+    unsigned long t_ratio;  
     double tensioneBatteria;  
     double percentualeBatteria;
     bool erroreTemperatura;
@@ -44,6 +45,8 @@ typedef struct s_parametri_configurazione {
     String mqtt_username;
     String mqtt_password;
     double k_divider;
+    double a1;
+    double a0;
     int r_ref;
 } ParametriConfigurazione;
 
@@ -54,7 +57,7 @@ ParametriConfigurazione getParametriConfigurazione();
 void loadParametriConfigurazione();
 void saveParametriConfigurazione(ParametriConfigurazione p);
 
-void setTemperatura(double t);
+void setTemperatura(double t, unsigned long t_ratio);
 void setValoriBatteria(double t, double p);
 void setErroreTemperatura(bool r);
 

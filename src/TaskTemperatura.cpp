@@ -36,8 +36,9 @@ void taskTemperaturaLoop(void * pvParameters){
 static task_status temp_read(task_status s){
     
     ParametriConfigurazione p = getParametriConfigurazione();
-    double tempC = thermo.temperature(RNOMINAL, p.r_ref);
-    setTemperatura(tempC);
+    //double tempC = thermo.temperature(RNOMINAL, p.r_ref);
+    unsigned long t_ratio = thermo.readRTD();
+    setTemperatura(t_ratio * p.a1 + p.a0, t_ratio);
     
     if(thermo.readFault() == 0){
       setErroreTemperatura(false);

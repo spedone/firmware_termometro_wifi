@@ -462,6 +462,12 @@
                             <label>Resistenza di riferimento temperatura</label>
                             <input type="number" step="0.01" v-model="calSettings.r_ref" class="form-control">
                         </div>
+                        <div class="form-group">
+                            <label>a1</label>
+                            <input type="number" step="0.0000001" v-model="calSettings.a1" class="form-control">
+                            <label>a0</label>
+                            <input type="number" step="0.0001" v-model="calSettings.a0" class="form-control">
+                        </div>
                         
                         <button @click="saveCalibrationSettings" class="btn btn-success" style="margin-top: 10px;">Salva Calibrazione</button>
                     </div>
@@ -494,7 +500,7 @@
                 const settingsError = ref('');
 
                 const netSettings = ref({ ssid: '', password: '', mqttBroker: '', mqttPort: 1883, mqttEndpoint: '', mqttUsername: '', mqttPassword: '' });
-                const calSettings = ref({ k_divider: 0.0, r_ref: 0.0 });
+                const calSettings = ref({ k_divider: 0.0, r_ref: 0.0, a1: 0.0, a0: 0.0 });
                 
                 const temperatura = ref('N/A');
                 const tensioneBatteria = ref('N/A');
@@ -534,6 +540,8 @@
                             const calData = await calRes.json();
                             calSettings.value.k_divider = calData.k_divider || 0.0;
                             calSettings.value.r_ref = calData.r_ref || 0.0;
+                            calSettings.value.a1 = calData.a1 || 0.0;
+                            calSettings.value.a0 = calData.a0 || 0.0;
                         }
                     } catch (err) {
                         console.error("Errore nel caricamento dei dati di precompilazione:", err);
