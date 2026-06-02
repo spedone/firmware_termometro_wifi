@@ -1,3 +1,4 @@
+/* TWIFI-ARDESP32 - Copyright 2026 Santino Pedone - see LICENSE for details */
 #include "GlobalData.h"
 #include "Tasks.h"
 
@@ -35,7 +36,6 @@ void startTaskBatteria(){
   current_status = (task_status){.run = battery_idle};
   xTaskCreatePinnedToCore(taskBatteriaLoop, "Batteria", 8192, NULL, 3, NULL, 1);
 }
-
 
 
 void taskBatteriaLoop(void * pvParameters) {

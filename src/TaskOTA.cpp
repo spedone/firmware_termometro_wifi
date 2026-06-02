@@ -1,3 +1,4 @@
+/* TWIFI-ARDESP32 - Copyright 2026 Santino Pedone - see LICENSE for details */
 #include <ArduinoOTA.h>
 #include "GlobalData.h"
 #include "Tasks.h"    

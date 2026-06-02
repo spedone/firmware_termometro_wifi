@@ -1,3 +1,4 @@
+/* TWIFI-ARDESP32 - Copyright 2026 Santino Pedone - see LICENSE for details */
 #ifndef GLOBALDATA_H
 #define GLOBALDATA_H
 

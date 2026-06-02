@@ -1,0 +1,11 @@
+TWIFI-ARDESP32 - Copyright 2026 Santino Pedone
+
+This product includes software developed by the authors and includes
+third-party libraries under their respective licenses:
+- Adafruit MAX31865 Library (BSD License)
+- ArduinoJson (MIT License)
+- ESPAsyncWebServer (LGPL License)
+- AsyncTCP (LGPL License)
+- PubSubClient (MIT License)
+- U8g2 (BSD/GPL License)
+- Espressif Systems ESP-IDF & Arduino-ESP32 (Apache 2.0 / LGPL)

@@ -1,3 +1,4 @@
+/* TWIFI-ARDESP32 - Copyright 2026 Santino Pedone - see LICENSE for details */
 #include <ESPAsyncWebServer.h>
 #include <SPIFFS.h>
 #include <WiFi.h> 

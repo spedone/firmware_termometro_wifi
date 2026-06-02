@@ -1,3 +1,4 @@
+/* TWIFI-ARDESP32 - Copyright 2026 Santino Pedone - see LICENSE for details */
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include "GlobalData.h"

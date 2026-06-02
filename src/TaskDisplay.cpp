@@ -1,3 +1,5 @@
+/* TWIFI-ARDESP32 - Copyright 2026 Santino Pedone - see LICENSE for details */
+
 #include <U8g2lib.h>
 #include "GlobalData.h"
 #include "Tasks.h"
