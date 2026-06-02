@@ -321,6 +321,20 @@
             margin-top: 10px;
             font-weight: 500;
         }
+       
+        .form-group-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .form-group-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
     </style>
 
     <script src="vue.global.prod.js"></script>
@@ -330,7 +344,7 @@
     <div id="app">
         
         <nav class="navbar">
-            <span class="navbar-brand">TWIFI-ARDESP32 <small>firmware ver. 1.2.0</small></span>
+        <span class="navbar-brand">TWIFI-ARDESP32 <small>{{ firmwareVersion === 'N/A' ? '' : `firmware ver. ${firmwareVersion}` }}</small></span>
             <div v-if="token" class="tab-container">
                 <button @click="currentTab = 'home'" :class="{ active: currentTab === 'home' }" class="tab-button">Home</button>
                 <button @click="currentTab = 'settings'" :class="{ active: currentTab === 'settings' }" class="tab-button">Impostazioni</button>
@@ -448,6 +462,10 @@
                                 </button>
                             </div>
                         </div>
+                        <div class="form-group-checkbox">
+                            <input type="checkbox" id="wifiMaxPower" v-model="netSettings.wifiMaxPower">
+                            <label for="wifiMaxPower" style="font-weight: 500; font-size: 0.95rem;">Abilita potenza massima WiFi</label>
+                        </div>
                         
                         <button @click="saveNetworkSettings" class="btn btn-success" style="margin-top: 10px;">Salva Rete</button>
                     </div>
@@ -500,7 +518,7 @@
                 const settingsFeedback = ref('');
                 const settingsError = ref('');
 
-                const netSettings = ref({ ssid: '', password: '', mqttBroker: '', mqttPort: 1883, mqttEndpoint: '', mqttUsername: '', mqttPassword: '' });
+                const netSettings = ref({ ssid: '', password: '', mqttBroker: '', mqttPort: 1883, mqttEndpoint: '', mqttUsername: '', mqttPassword: '', wifiMaxPower: false });
                 const calSettings = ref({ k_divider: 0.0, r_ref: 0.0, a1: 0.0, a0: 0.0 });
                 
                 const temperatura = ref('N/A');
@@ -508,11 +526,14 @@
                 const percentualeBatteria = ref('N/A');
                 const isWiFiOn = ref(false);
                 const isMQTTOn = ref(false);
+                
 
                 const serialNumber = ref('Caricamento...');
                 const macAddress = ref('Caricamento...');
+                const firmwareVersion = ref('N/A');
 
                 let ws = null;
+
 
                 // Recupera le configurazioni attuali dal server REST JSON
                 const loadCurrentSettings = async () => {
@@ -531,6 +552,7 @@
                             netSettings.value.mqttEndpoint = netData.mqttEndpoint || '';
                             netSettings.value.mqttUsername = netData.mqttUsername || '';
                             netSettings.value.mqttPassword = netData.mqttPassword || '';
+                            netSettings.value.wifiMaxPower = netData.wifiMaxPower || false;
                         }
 
                         // Richiesta parametri calibrazione
@@ -566,7 +588,7 @@
                                 percentualeBatteria.value = data.batt_pct;
                                 isWiFiOn.value = data.wifi;
                                 isMQTTOn.value = data.mqtt;
-                                
+                                firmwareVersion.value = data.firmwareVersion || 'N/A';
                                 serialNumber.value = data.sn || 'N/A';
                                 macAddress.value = data.mac || 'N/A';
                             }
@@ -598,6 +620,7 @@
 
                         connectWebSocket();
                         loadCurrentSettings(); // Precompila i form subito dopo l'autenticazione
+                        
                     } catch (err) {
                         error.value = err.message;
                     }
@@ -654,8 +677,8 @@
 
                 return { 
                     currentTab, currentSettingsSubTab, token, password, error, 
-                    showLoginPassword, showWifiPassword, showMqttPassword,
-                    settingsFeedback, settingsError, netSettings, calSettings,
+                    showLoginPassword, showWifiPassword, showMqttPassword, 
+                    settingsFeedback, settingsError, netSettings, calSettings, firmwareVersion,
                     temperatura, tensioneBatteria, percentualeBatteria, isWiFiOn, isMQTTOn,
                     serialNumber, macAddress, login, logout, saveNetworkSettings, saveCalibrationSettings 
                 };

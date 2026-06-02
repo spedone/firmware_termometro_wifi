@@ -51,7 +51,10 @@ static task_status wifi_start(task_status s) {
   ParametriConfigurazione p = getParametriConfigurazione();
   if(p.wifi_ssid == "") return (task_status){.run = ap_mode_start};
   WiFi.mode(WIFI_STA);
-  WiFi.setTxPower(WIFI_POWER_11dBm);
+  if(p.wifi_max_power == true)
+     WiFi.setTxPower(WIFI_POWER_19_5dBm);
+  else
+     WiFi.setTxPower(WIFI_POWER_11dBm);
   WiFi.begin(p.wifi_ssid.c_str(), p.wifi_password.c_str());
   timeout_wifi = millis();
   return (task_status){.run = wifi_wait};
@@ -85,8 +88,12 @@ static task_status ap_mode_start(task_status s) {
   int canaliPuliti[] = {1, 6, 11};
   int indiceRandom = esp_random() % 3;
   WiFi.disconnect(true);
-  WiFi.mode(WIFI_AP);
-  WiFi.setTxPower(WIFI_POWER_11dBm);
+  WiFi.mode(WIFI_AP); 
+  ParametriConfigurazione p = getParametriConfigurazione();
+  if(p.wifi_max_power == true)
+     WiFi.setTxPower(WIFI_POWER_19_5dBm);
+  else
+     WiFi.setTxPower(WIFI_POWER_11dBm);
   WiFi.softAP(MODEL_NAME "-" SERIAL_NR, "12345678", canaliPuliti[indiceRandom], 0, 4);
   return (task_status){.run = ap_mode_idle};
 }

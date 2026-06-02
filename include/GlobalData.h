@@ -11,6 +11,10 @@
     #define SERIAL_NR "26000" 
 #endif
 
+#ifndef FMWR_VERSION
+    #define FMWR_VERSION "N/A" 
+#endif
+
 #include <Arduino.h>
 
 typedef struct s_letture_sensori {
@@ -45,6 +49,7 @@ typedef struct s_parametri_configurazione {
     int mqtt_port;
     String mqtt_username;
     String mqtt_password;
+    bool wifi_max_power;
     double k_divider;
     double a1;
     double a0;

@@ -62,6 +62,7 @@ static task_status webserver_start(task_status s){
         }
     });
 
+
     // 2. Autenticazione / Login
     server.on("/api/login", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL, 
         [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
@@ -99,7 +100,7 @@ static task_status webserver_start(task_status s){
         doc["mqttEndpoint"] = p.mqtt_endpoint;
         doc["mqttUsername"] = p.mqtt_username;
         doc["mqttPassword"] = p.mqtt_password;
-        
+        doc["wifiMaxPower"] = p.wifi_max_power;
 
         String response;
         serializeJson(doc, response);
@@ -148,6 +149,7 @@ static task_status webserver_start(task_status s){
             if (doc["mqttEndpoint"].is<String>()) p.mqtt_endpoint = doc["mqttEndpoint"].as<String>();
             if (doc["mqttUsername"].is<String>()) p.mqtt_username = doc["mqttUsername"].as<String>();
             if (doc["mqttPassword"].is<String>()) p.mqtt_password = doc["mqttPassword"].as<String>();
+            if (doc["wifiMaxPower"].is<bool>()) p.wifi_max_power = doc["wifiMaxPower"].as<bool>();
 
             saveParametriConfigurazione(p);
             loadParametriConfigurazione();
@@ -222,6 +224,7 @@ static task_status webserver_idle(task_status s){
         doc["mqtt"] = sr.isMqttConnected;
         doc["sn"] = SERIAL_NR;
         doc["mac"] = WiFi.macAddress(); 
+        doc["firmwareVersion"] = String(FMWR_VERSION); 
 
         String jsonResponse;
         serializeJson(doc, jsonResponse);

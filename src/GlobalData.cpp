@@ -86,6 +86,7 @@ ParametriConfigurazione getParametriConfigurazione(){
     p.r_ref = parametriConfigurazione.r_ref;
     p.a1 = parametriConfigurazione.a1;
     p.a0 = parametriConfigurazione.a0;
+    p.wifi_max_power = parametriConfigurazione.wifi_max_power;
     xSemaphoreGive(xMutexParametriConfigurazione);
   }
 
@@ -107,6 +108,7 @@ void loadParametriConfigurazione(){
     parametriConfigurazione.r_ref = pref.getInt("r_ref", 430);
     parametriConfigurazione.a1 = pref.getDouble("a1", 0.0);
     parametriConfigurazione.a0 = pref.getDouble("a0", 0.0);
+    parametriConfigurazione.wifi_max_power = pref.getBool("wifi_max_power", false);
     pref.end();
     xSemaphoreGive(xMutexParametriConfigurazione);
   }
@@ -127,6 +129,7 @@ void saveParametriConfigurazione(ParametriConfigurazione p){
   pref.putInt("r_ref", p.r_ref);
   pref.putDouble("a1", p.a1);
   pref.putDouble("a0", p.a0);
+  pref.putBool("wifi_max_power", p.wifi_max_power);
   pref.end();
 }
 
